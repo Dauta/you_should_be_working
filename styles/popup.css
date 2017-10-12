@@ -1,0 +1,13 @@
+.popup-window{
+  display: flex;
+  width: 200px;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  background-color: #2290AC;
+  color: #FFFFFF;
+}
+
+#timer{
+  text-align: center;
+}

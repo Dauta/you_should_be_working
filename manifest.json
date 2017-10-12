@@ -1,0 +1,18 @@
+{
+  "manifest_version": 2,
+  "name": "Just Work it!",
+  "version": "0.0.1",
+  "description": "Helps concentrate and stay productive, by resticting browsing time on time-wasting websites.",
+  "background": {
+    "persistent": true,
+    "scripts": ["lib/moment.min.js", "bin/background.js"]
+  },
+  "permissions": [
+    "tabs"
+  ],
+  "browser_action": {
+    "default_title": "You Should Be Working",
+    "default_icon": "icon_128.png",
+    "default_popup": "popup.html"
+  }
+}
