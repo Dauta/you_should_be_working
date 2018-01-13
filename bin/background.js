@@ -1,56 +1,79 @@
-function initialize_timer(){
-  return moment.duration(20, 'm');
+const initialize_timer = (s) => {
+  return moment.duration(s, 's');
 }
 
-function countdown(prev_time){
-  return prev_time.subtract(1, 's');
+const subtract_seconds = (s, prev_time) => {
+  return prev_time.subtract(s, 's');
 }
 
-function send_to_view(time){
+const countdown = (prev_time) => {
+  return subtract_seconds(1, prev_time);
+}
+
+const send_to_view = (time) => {
   //console.log(time)
-  chrome.runtime.sendMessage({method: "update", body: time }, function(err){
-    if(err)
-      console.log(err);
+  return chrome.runtime.sendMessage({method: "update", body: time }, (err) => {
+    if(err) console.log(err);
   });
 }
 
-function get_host_url(url){
-  var pathArray = url.split( '/' );
-  var host = pathArray[2];
+const get_host_url = (url) => {
+  const pathArray = url.split( '/' );
+  const host = pathArray[2];
   return host;
 }
 
-function start_timer(){
-  //set 20 minutes
-  let time_left = initialize_timer();
-  //start timer
-  let timer = setInterval(function(){
-
-    chrome.tabs.query({active: true}, function(tab){
-      //get url
-      let url = get_host_url(tab[0].url);
-      //check
-      if(url === 'www.youtube.com' || url === 'youtube.com'){
-        //decrement remaining time
-        let current_time = countdown(time_left);
-        
-        if(current_time.as('seconds') > 0){
-          let current_minutes = current_time.get('m');
-          let current_seconds = current_time.get('s');
-          //format seconds to look like a clock
-          if(current_seconds < 10)
-            current_seconds = `0${current_seconds}`;
-          //send to pop-up  
-          send_to_view(`${current_minutes}:${current_seconds}`);   
-        }
-        else {
-          send_to_view(`Time's up, go work! BITCH!`);             
-        }
-      }
-      else
-        send_to_view(`This website is clear, enjoy!`);          
-    });
-  },1000);
+const procrastination_url = (url) => {
+  return (url === 'www.youtube.com' || url === 'youtube.com' || url === 'facebook.com' || url === 'www.facebook.com');
 }
 
-start_timer();
+const get_active_tab = () => {
+  return new Promise((resolve, reject) => {
+    chrome.tabs.query({active: true}, (tab) => {
+
+      return resolve(tab[0]);
+    });
+  });
+}
+
+const purge_view = () => {
+  let view = document.getElementsByTagName("body")[0];
+  view.innerHTML = "<h1>Boiiii</h1>";
+}
+
+const end_session = () => {
+  purge_view();
+  return send_to_view(`Time's up. go work, Boiiiiiii! Come back in 2 hrs or so idk`);
+}
+
+const decrement_time = (remaining_time) => {
+  let current_time = countdown(remaining_time);
+  
+  if(current_time.as('seconds') <= 0) return end_session();
+  
+  let current_minutes = current_time.get('m');
+  let current_seconds = current_time.get('s');
+  //format seconds to look like a clock
+  if(current_seconds < 10)
+    current_seconds = `0${current_seconds}`;
+
+  return send_to_view(`${current_minutes}:${current_seconds}`);
+}
+
+const tick_action = async (remaining_time) => {
+
+  const active_tab = await get_active_tab();
+  const host_url = get_host_url(active_tab.url);
+  if(procrastination_url(host_url)) return decrement_time(remaining_time);
+  //non-procrastination
+  return send_to_view(`This website is (probably) clear, enjoy!`);     
+}
+
+const start = () => {
+  //set 20 minutes
+  let remaining_time = initialize_timer(5);
+  //start timer
+  let timer = setInterval(() => { tick_action(remaining_time) }, 1000);
+}
+
+start();

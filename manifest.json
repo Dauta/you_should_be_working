@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
-  "name": "Just Work it!",
-  "version": "0.0.1",
+  "name": "You should be working",
+  "version": "0.0.2",
   "description": "Helps concentrate and stay productive, by resticting browsing time on time-wasting websites.",
   "background": {
     "persistent": true,
